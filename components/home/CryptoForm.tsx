@@ -14,14 +14,34 @@ const CryptoForm = ({ setAddress, updateBalances }: CryptoFormProps) => {
   const [address, setInputAddress] = useState('')
   const [error, setError] = useState<string | null>()
   const [isLoading, setIsLoading] = useState(false)
+  const [balances, setBalances] = useState([])
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const onChangeInput = (value: string) => {
+  const onChangeInput = async (value: string) => {
+    if (isSubmitted) {
+      setIsSubmitted(false)
+    }
+    setError(null)
+
+    setInputAddress(value)
+
     if (!isAddress(value)) {
       setError('Please provide a valid Ethereum Address')
     } else {
-      setError('')
+      setIsLoading(true)
+
+      const balances = await getBalances(value)
+      const isAllZero = balances.every((balance) => balance.isZero())
+
+      if (isAllZero) {
+        setError('At least one balance needs to be greater than zero')
+        updateBalances(['--', '--', '--'])
+      } else {
+        setAddress(value)
+        updateBalances(balances)
+      }
+      setIsLoading(false)
     }
-    setInputAddress(value)
   }
 
   const onSubmit = async () => {
@@ -29,41 +49,24 @@ const CryptoForm = ({ setAddress, updateBalances }: CryptoFormProps) => {
 
     setIsLoading(true)
 
-    try {
-      const balances = await getBalances(address)
-      const isAllZero = balances.every((balance) => balance.isZero())
-
-      if (isAllZero) {
-        setError('At least one balance needs to be greater than zero')
-        updateBalances(['--', '--', '--'])
-      } else {
-        setAddress(address)
-        setError(null)
-        updateBalances(balances)
-
-        axios
-          .post('/api/balances', {
-            address: address,
-            balances: Tokens.map((token, index) => ({
-              token: token.symbol,
-              balance: balances[index],
-            })),
-          })
-          .then(() => {
-            toast.success('Successfully saved')
-          })
-          .catch(() => {
-            toast.error('Something went wrong')
-          })
-          .finally(() => {
-            setIsLoading(false)
-          })
-      }
-    } catch (err: any) {
-      toast.error(err.message)
-    } finally {
-      setIsLoading(false)
-    }
+    axios
+      .post('/api/balances', {
+        address: address,
+        balances: Tokens.map((token, index) => ({
+          token: token.symbol,
+          balance: balances[index],
+        })),
+      })
+      .then(() => {
+        toast.success('Successfully submitted')
+        setIsSubmitted(true)
+      })
+      .catch(() => {
+        toast.error('Something went wrong')
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
   return (
@@ -86,7 +89,7 @@ const CryptoForm = ({ setAddress, updateBalances }: CryptoFormProps) => {
           className="w-full py-3 px-3 border"
           value={address}
           onChange={(e) => onChangeInput(e.target.value)}
-          onKeyUp={(e) => onChangeInput((e.target as any).value)}
+          // onKeyUp={(e) => onChangeInput((e.target as any).value)}
         ></input>
         <p className=" text-sm text-red-600 h-3">{error}</p>
       </div>
@@ -98,7 +101,13 @@ const CryptoForm = ({ setAddress, updateBalances }: CryptoFormProps) => {
           disabled={!!error || !address}
           onClick={() => onSubmit()}
         >
-          {isLoading ? <div className="loading-spinner"></div> : 'Submit'}
+          {isLoading ? (
+            <div className="loading-spinner"></div>
+          ) : isSubmitted ? (
+            'Submitted!'
+          ) : (
+            'Submit'
+          )}
         </button>
       </div>
     </div>
