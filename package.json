@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "yarn eth-sdk && next build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --check \"./**/*.{ts,tsx,js,jsx}\"",
