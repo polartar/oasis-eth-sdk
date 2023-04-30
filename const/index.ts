@@ -1,4 +1,6 @@
-export const Tokens = [
+import { IToken } from 'types/cryptoBalance'
+
+export const Tokens: IToken[] = [
   {
     img: '/dai_circle_color.svg',
     name: 'Dai',

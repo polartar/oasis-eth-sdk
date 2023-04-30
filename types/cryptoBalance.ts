@@ -4,3 +4,4 @@ export interface IToken {
   symbol: string
   balance: string
 }
+

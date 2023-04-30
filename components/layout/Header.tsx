@@ -8,7 +8,9 @@ const Header = () => {
 
       <div className="ml-5 flex flex-col text-[#e5f9f8]">
         <span className=" font-bold font-">Muhammad Abdullah</span>
+
         <span>Oazo Apps full stack candidate</span>
+
         <a
           href="https://github.com/polartar"
           className=" text-sm underline"
