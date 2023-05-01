@@ -27,7 +27,7 @@ const Home: NextPage = () => {
 
   return (
     <div className="content">
-      <div className="flex gap-4 py-4 px-12 ">
+      <div className="flex gap-4 py-4 px-12 flex-wrap justify-center">
         <CryptoBalances tokenList={tokens} />
 
         <CryptoForm setAddress={setAddress} updateBalances={updateBalances} />
